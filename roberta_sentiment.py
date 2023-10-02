@@ -40,8 +40,6 @@ def get_sentiment(text, tokenizer, model, config):
     # negative, neutral, positive
     scores = output[0][0].detach().numpy()
     scores = softmax(scores)
-    
-    #print(filtered_text)
 
     # we only need the last item
     ranking = np.argsort(scores)
@@ -49,6 +47,7 @@ def get_sentiment(text, tokenizer, model, config):
     # return the correct label and the corresponding score    
     return config.id2label[ranking[2]], scores[ranking[2]]
 
+# Function for running sentiment analysis on test cases
 def run_sentiment_on_test(tokenizer, model, config):
     # Reading a CSV file using pandas
     df = pd.read_csv('sentiment_test_cases.csv')
@@ -63,11 +62,24 @@ def run_sentiment_on_test(tokenizer, model, config):
         pred_sentiment.append(label)
         pred_score.append(score)
 
+    # Export the model output and confidence scores to csv
+    df_final = pd.DataFrame({
+        'text': df['text'].tolist(),
+        'expected_sentiment': df['expected_sentiment'].tolist(),
+        'model_output': pred_sentiment,
+        'confidence_score': pred_score
+    })
+
+    df_final.to_csv('output_sentiment_test.csv')
+    print('Exported results to output_sentiment_test.csv')
+
+    # Compute and print the accuracy
     actual = df['expected_sentiment'].tolist()
     accuracy = accuracy_score(actual, pred_sentiment)
 
     print('Computed accuracy:', "{:.2f}%".format(accuracy*100))
 
+# Function for running sentiment analysis on input sentence
 def run_sentiment_on_input(sent, tokenizer, model, config):
     output = {}
 
@@ -81,14 +93,19 @@ def run_sentiment_on_input(sent, tokenizer, model, config):
 
 if __name__ == "__main__":
 
-    # load roberta model
+    # Load roberta model
     model_name = "cardiffnlp/twitter-roberta-base-sentiment-latest"
     tokenizer, model, config = load_model(model_name)
 
+    # Accept input sentence from user
     sent = input('\nEnter input sentence: ')
 
+    # Using the special string 'run_test', run the model on test cases
+    # else run sentiment analysis on text user has given
     if sent == 'run_test':
+        print('Running model on test cases...')
         run_sentiment_on_test(tokenizer, model, config)
+
     else:
         output = run_sentiment_on_input(sent, tokenizer, model, config)
 
