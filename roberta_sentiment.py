@@ -102,14 +102,17 @@ if __name__ == "__main__":
 
     # Using the special string 'run_test', run the model on test cases
     # else run sentiment analysis on text user has given
-    if sent == 'run_test':
-        print('Running model on test cases...')
-        run_sentiment_on_test(tokenizer, model, config)
+    while(1):
+        sent = input('\nEnter input sentence: ')
 
-    else:
-        output = run_sentiment_on_input(sent, tokenizer, model, config)
+        if sent == 'run_test':
+            run_sentiment_on_test(tokenizer, model, config)
+        elif sent == 'end_test':
+            break
+        else:
+            output = run_sentiment_on_input(sent, tokenizer, model, config)
 
-        print(output)
+            print(output)
 
     
    
